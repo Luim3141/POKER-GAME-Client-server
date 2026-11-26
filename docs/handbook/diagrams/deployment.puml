@@ -1,0 +1,29 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam roundcorner 0
+top to bottom direction
+node "Máy người chơi\nWindows + Radmin VPN" as pc {
+ artifact "PokerClient.exe\nJava runtime đi kèm" as app
+}
+cloud "LAN ảo Radmin\nCác máy cùng network" as vpn
+node "Máy chủ Poker Host\nWindows / 192.0.2.10" as host {
+ component "Firewall\nRadmin VPN / TCP 9090\nRemote: 26.0.0.0/8" as fw
+ artifact "PokerServerMain\nbind 0.0.0.0:9090" as srv
+ database "MariaDB\n127.0.0.1:3306" as db
+ fw --> srv : inbound được phép
+ srv --> db : JDBC nội bộ
+}
+app --> vpn : TCP client
+vpn --> fw : 192.0.2.10:9090
+note bottom of db
+Client không kết nối DB.
+Không mở inbound 3306.
+end note
+
+@enduml

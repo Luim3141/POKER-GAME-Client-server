@@ -1,0 +1,22 @@
+target/
+releases/*.zip
+.mvn/apache-maven-*/
+.idea/
+.vscode/
+*.iml
+.env
+config/local.properties
+.recovery/
+backups/*.sql
+.codex-tmp/
+*.log
+~$*
+
+# Local deployment records and coursework with personal information.
+/BAO_CAO_DIEU_TRA_KET_NOI_LTM.md
+/docs/Huong_dan_*.docx
+/docs/REPORT_MAPPING.md
+/docs/handbook/*.docx
+/docs/handbook/diagrams/deployment.png
+/docs/presentation/
+/docs/reports/

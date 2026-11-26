@@ -1,0 +1,33 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam roundcorner 0
+participant "Main\nController" as ui
+participant "Poker\nClient" as client
+participant "Server\nController" as server
+participant "Auth /\nSessionManager" as auth
+database MariaDB as db
+ui -> ui : initialize()
+ui -> client : worker: connect(host, port)
+client -> client : Socket.connect / receiver
+ui -> client : handleLogin: login(...)
+client -> server : LOGIN (qua ClientHandler)
+server -> auth : login / create session
+auth -> db : user / token hash
+db --> auth : user ACTIVE
+auth --> server : user + token
+server -> server : attach(userId)
+server --> client : LOGIN_SUCCESS
+client -> client : state.apply(message)
+client --> ui : onMessage(message)
+ui -> ui : runLater / route theo role
+opt user có membership đang giữ
+ server --> client : STATE_SNAPSHOT
+end
+
+@enduml

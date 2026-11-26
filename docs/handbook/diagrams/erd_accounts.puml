@@ -1,0 +1,60 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam roundcorner 0
+hide circle
+hide methods
+top to bottom direction
+entity users {
+ * id : BIGINT <<PK>>
+ --
+ account_role / account_status
+ chips : BIGINT
+}
+entity sessions {
+ * token_hash : BINARY(32) <<PK>>
+ --
+ * user_id : BIGINT <<FK>>
+ expires_at / revoked_at
+}
+entity coin_requests {
+ * id : BIGINT <<PK>>
+ --
+ * user_id : BIGINT <<FK>>
+ reviewed_by : BIGINT <<FK,NULL>>
+ amount / status
+}
+entity wallet_transactions {
+ * id : BIGINT <<PK>>
+ --
+ * user_id : BIGINT <<FK>>
+ coin_request_id : BIGINT <<FK,NULL>>
+ hand_id : CHAR(36) <<FK,NULL>>
+ admin_user_id : BIGINT <<FK,NULL>>
+ amount / balance_after
+}
+entity admin_audit_log {
+ * id : BIGINT <<PK>>
+ --
+ * admin_user_id : BIGINT <<FK>>
+ * target_user_id : BIGINT <<FK>>
+ action_type / details_json
+}
+users ||--o{ sessions
+users ||--o{ coin_requests : requester
+coin_requests |o--o{ wallet_transactions
+users ||--o{ wallet_transactions : owner
+users ||--o{ admin_audit_log : admin / target
+note bottom
+View tài khoản và ledger. Các FK reviewed_by và
+admin_user_id cũng tham chiếu users.id.
+wallet_transactions.hand_id tham chiếu hands.id
+(Hình ERD gameplay). Mỗi log có cả admin và target.
+end note
+
+@enduml

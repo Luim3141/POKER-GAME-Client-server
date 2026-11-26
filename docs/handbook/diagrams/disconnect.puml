@@ -1,0 +1,27 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+start
+:Socket đóng hoặc heartbeat hết hạn;
+:Registry xác nhận connection hiện hành;
+if (Player đang trong hand?) then (không)
+ :Giải phóng seat ngay;
+ :Có thể vào bàn lại sau login;
+else (có)
+ :Đánh dấu DISCONNECTED;
+ :Giữ bài, contribution và deadline;
+ if (Resume trước khi hand xong?) then (có)
+  :Thay connection, gửi snapshot riêng;
+  :Giữ seat, không kéo dài lượt;
+ else (không)
+  :Timeout CHECK hoặc FOLD;
+  :All-in vẫn có quyền nhận pot;
+  :Settlement trước, rồi xóa seat offline;
+  :Login lại về lobby, đọc wallet đã commit;
+ endif
+endif
+stop
+@enduml

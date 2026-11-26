@@ -1,0 +1,34 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+start
+:Người chơi vào bàn và Ready;
+:Đủ điều kiện bắt đầu hand;
+:Chọn Dealer / SB / BB, trừ blinds;
+:DEALING - chia 2 lượt bài riêng;
+:BETTING - Pre-flop;
+while (Còn nhiều người và còn street?) is (có)
+ :DEALING - Flop / Turn / River;
+ if (Còn người cần quyết định cược?) then (có)
+  :BETTING - chọn actor sau Dealer;
+  :Mỗi lượt có 20 giây;
+ else (all-in)
+  :Runout tuần tự, không prompt cược;
+ endif
+endwhile (không)
+:Một người còn lại hoặc Showdown;
+:Tính pot / refund / payout;
+:Transaction settlement;
+if (Commit thành công?) then (có)
+ :HAND_RESULT và wallet chính thức;
+ :UI ăn mừng độc lập;
+else (lỗi)
+ :Rollback, báo lỗi, không ăn mừng;
+endif
+:BETWEEN_HANDS, reset Ready;
+:Dọn seat offline, chờ hand tiếp theo;
+stop
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam roundcorner 0
+!include <C4/C4_Container>
+LAYOUT_TOP_DOWN()
+Person(player, "Người dùng", "Player / Observer / Admin")
+System_Boundary(poker, "Hệ thống Poker") {
+ Container(client, "Poker Client", "JavaFX / CLI", "Command và render cục bộ")
+ Container(server, "Poker Server", "Java 21", "Auth, game và settlement")
+ ContainerDb(db, "MariaDB", "JDBC", "Sessions, history, ledger")
+}
+Rel(player, client, "Thao tác giao diện")
+Rel(client, server, "Command / event", "TCP 9090 / JSON")
+Rel_Right(server, db, "Transaction", "Localhost 3306")
+
+@enduml

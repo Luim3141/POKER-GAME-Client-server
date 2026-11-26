@@ -1,0 +1,30 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+participant "PokerTableRuntime\ngame thread" as table
+participant Scheduler as timer
+queue "Table queue" as q
+participant "Client\nreceiver / UI" as client
+table -> table : beginDeal(cards, afterSeat)
+table -> table : DEALING; actor = null\ncancel turn timeout
+table -> client : TABLE_STATE\nphase / duration / remaining / cards
+table -> timer : schedule(remaining, generation, hand)
+client -> client : animation từ elapsed\n350 ms / lá, interval 450 ms
+opt client gửi cược sớm
+ client -> table : PLAYER_ACTION (qua controller / queue)
+ table --> client : ACTION_REJECTED: NOT_READY
+end
+timer -> q : enqueue finish (không mutation)
+q -> table : finish trên game thread
+table -> table : guard running / hand / generation / phase
+alt còn người có thể cược
+ table -> table : BETTING; chọn first actor\nscheduleTurn: đủ 20 giây
+ table -> client : TABLE_STATE; ACTION_REQUIRED
+else all-in, không còn action
+ table -> table : advanceStreet → beginDeal\nhoặc showdown khi hết River
+end
+@enduml

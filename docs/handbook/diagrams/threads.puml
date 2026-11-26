@@ -1,0 +1,41 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam roundcorner 0
+top to bottom direction
+skinparam ranksep 20
+skinparam nodesep 20
+package "1. Nhận và định tuyến" {
+rectangle "Accept thread\nServerSocket.accept()" as accept
+rectangle "Reader pool (64)\nClientHandler.run()" as read
+rectangle "ServerController\nauth / RBAC / routing" as ctrl
+accept -down-> read : giao Socket
+read -down-> ctrl : Message
+}
+package "2. Mutation tại bàn" {
+rectangle "Scheduler\ndeal finish / turn timeout" as timer
+queue "Table command queue\nmỗi bàn một queue" as queue
+rectangle "Game thread\nmutation + snapshot" as game
+timer -down-> queue : hand + generation
+queue -down-> game : take / run
+}
+package "3. Gửi và render" {
+queue "Outbound FIFO 128\nmỗi connection" as out
+rectangle "Virtual writer\ncodec.write / flush" as writer
+rectangle "Client receiver\nClientState + listener" as receiver
+rectangle "JavaFX thread\nPlatform.runLater" as fx
+out -down-> writer : FIFO
+writer -down-> receiver : TCP frame
+receiver -down-> fx : render event
+}
+ctrl -right-> queue : command
+game -right-> out : snapshot riêng
+accept -[hidden]right-> timer
+timer -[hidden]right-> out
+
+@enduml

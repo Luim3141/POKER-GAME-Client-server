@@ -1,0 +1,57 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam roundcorner 0
+hide circle
+hide methods
+top to bottom direction
+entity users {
+ * id : BIGINT <<PK>>
+ --
+ username : VARCHAR <<UQ>>
+ chips : BIGINT
+}
+entity poker_tables {
+ * id : CHAR(36) <<PK>>
+ --
+ * owner_user_id : BIGINT <<FK>>
+ small_blind : BIGINT
+ max_players : TINYINT
+}
+entity hands {
+ * id : CHAR(36) <<PK>>
+ --
+ * table_id : CHAR(36) <<FK>>
+ board_json : TEXT
+ settled_at : TIMESTAMP <<NULL>>
+}
+entity hand_players {
+ * hand_id : CHAR(36) <<PK,FK>>
+ * user_id : BIGINT <<PK,FK>>
+ --
+ starting_stack / final_stack : BIGINT
+ contribution : BIGINT
+}
+entity hand_actions {
+ * id : BIGINT <<PK>>
+ --
+ * hand_id : CHAR(36) <<FK>>
+ * user_id : BIGINT <<FK>>
+ action_seq : INT
+}
+users ||--o{ poker_tables : owner
+poker_tables ||--o{ hands
+hands ||--o{ hand_players
+hands ||--o{ hand_actions
+users ||--o{ hand_players
+users ||--o{ hand_actions
+note bottom of hand_actions
+UQ (hand_id, action_seq)
+end note
+
+@enduml

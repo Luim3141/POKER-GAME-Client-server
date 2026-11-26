@@ -1,0 +1,58 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam roundcorner 0
+top to bottom direction
+class PokerClient {
+ - state : ClientState
+ - connection : ServerConnection
+ + connect(host, port)
+ + action(action, amount, snapshot)
+ - receiveLoop()
+}
+class ServerConnection {
+ - socket : Socket
+ + send(message)
+ + receive() : Message
+}
+interface ClientEventListener {
+ + onMessage(message)
+ + onDisconnected(cause)
+}
+class ProtocolCodec {
+ + read(input) : Message
+ + write(output, message)
+}
+class ClientHandler {
+ - outbound : BlockingQueue
+ + run()
+ + send(message)
+ - writeLoop()
+}
+class ServerController {
+ + handle(client, message)
+ - handleAuthenticated(client, request)
+}
+class PokerTableRuntime {
+ - commands : BlockingQueue
+ - gameThread : Thread
+ + action(userId, action, seq)
+ - snapshotFor(viewerId, role)
+}
+class ClientState
+class LobbyManager
+PokerClient "1" *-- "1" ClientState
+PokerClient "1" *-- "0..1" ServerConnection
+PokerClient --> ClientEventListener : callback
+ServerConnection --> ProtocolCodec : dùng
+ClientHandler --> ProtocolCodec : dùng
+ClientHandler --> ServerController : route
+ServerController --> LobbyManager
+LobbyManager "1" *-- "0..*" PokerTableRuntime
+
+@enduml

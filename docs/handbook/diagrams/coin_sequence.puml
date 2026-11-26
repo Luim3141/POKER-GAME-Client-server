@@ -1,0 +1,29 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam roundcorner 0
+actor Player
+participant "Server\nController" as ctrl
+participant "JdbcAccount\nAdministration" as repo
+database MariaDB as db
+actor Admin
+Player -> ctrl : SUBMIT_COIN_REQUEST\namount
+ctrl -> repo : submitCoinRequest
+repo -> db : lưu PENDING\nkiểm tra request trùng
+ctrl --> Admin : ADMIN_DASHBOARD push
+Admin -> ctrl : REVIEW_COIN_REQUEST\nid / approved
+ctrl -> ctrl : giữ UserOperationLocks\nkiểm tra target không seated
+ctrl -> repo : review(adminId, requestId,...)
+repo -> db : transaction: lock request / user
+repo -> db : balance + ledger + request + audit
+db --> repo : COMMIT
+ctrl -> ctrl : unlock target
+ctrl --> Player : COIN_REQUEST_SNAPSHOT\nWALLET_UPDATED
+ctrl --> Admin : ADMIN_DASHBOARD mới
+
+@enduml

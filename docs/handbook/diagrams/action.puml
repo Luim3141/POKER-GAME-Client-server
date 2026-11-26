@@ -1,0 +1,44 @@
+@startuml
+skinparam dpi 180
+skinparam defaultFontName Arial
+skinparam defaultFontSize 16
+skinparam shadowing false
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam roundcorner 0
+actor Player
+participant "PokerClient" as client
+participant ServerController as controller
+participant "PokerTableRuntime\ncommand queue" as table
+participant "Writer FIFO" as writer
+Player -> client : action(action, amount, snapshot)
+client -> controller : PLAYER_ACTION\ntableId + handId + seq
+controller -> controller : auth / RBAC / table / hand
+controller -> table : action(userId, action, seq)
+activate table
+table -> table : kiểm tra phase / version / turn / amount
+alt hợp lệ
+ table -> table : applyAction / changed
+ table -> writer : TABLE_ACTION cho toàn bàn
+ alt tiếp tục cùng street
+  table -> writer : TABLE_STATE riêng mỗi recipient
+  table -> writer : ACTION_REQUIRED cho next actor
+ else chuyển street
+  table -> table : beginDeal (DEALING)
+  table -> writer : COMMUNITY_UPDATE / TABLE_STATE
+ else kết thúc hand
+  table -> table : payout / settlement transaction
+  table -> writer : HAND_RESULT / TABLE_STATE
+ end
+ table --> controller : hoàn tất command
+ controller -> writer : ACTION_ACCEPTED
+else không hợp lệ
+ table --> controller : lỗi nghiệp vụ
+ controller -> writer : ACTION_REJECTED
+end
+deactivate table
+writer --> client : frame JSON theo FIFO connection
+client -> client : apply state rồi phát event
+
+@enduml
